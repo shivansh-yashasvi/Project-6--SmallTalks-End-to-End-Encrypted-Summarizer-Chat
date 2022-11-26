@@ -19,8 +19,10 @@ body {
 }
 
 .Toastify__toast-theme--dark {
-  background-color: #00000076 !important;
+  background-color: #e3f2e1 !important;
+  color: rgb(98, 127, 95);
 }
+
 
 
 .summarizer_btn{
@@ -28,8 +30,9 @@ body {
   justify-content: center;
   align-items: left;
   padding: 0.5rem;
+  color: white;
   border-radius: 0.5rem;
-  background-color: #9a86f3;
+  background-color: rgb(55, 84, 52);
   border: none;
   cursor: pointer;
 }

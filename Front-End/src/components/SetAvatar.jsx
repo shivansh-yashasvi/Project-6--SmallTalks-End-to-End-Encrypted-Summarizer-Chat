@@ -109,7 +109,7 @@ const Container = styled.div`
   align-items: center;
   flex-direction: column;
   gap: 3rem;
-  background-color: #131324;
+  background-color: rgb(55, 84, 52);
   height: 100vh;
   width: 100vw;
 
@@ -144,8 +144,8 @@ const Container = styled.div`
     }
   }
   .submit-btn {
-    background-color: #4e0eff;
-    color: white;
+    background-color: #e3f2e1;
+    color: black;
     padding: 1rem 2rem;
     border: none;
     font-weight: bold;
@@ -154,7 +154,7 @@ const Container = styled.div`
     font-size: 1rem;
     text-transform: uppercase;
     &:hover {
-      background-color: #4e0eff;
+      background-color: rgb(97, 173, 89);
     }
   }
 `;

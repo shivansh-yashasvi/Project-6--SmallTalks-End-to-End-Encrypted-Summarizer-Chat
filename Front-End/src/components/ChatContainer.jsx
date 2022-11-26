@@ -125,6 +125,8 @@ async function summarize()
           console.log(responsesummary.data.summary.map((vals)=>{console.log(vals)}));
         alert(responsesummary.data.summary.toString());
         })
+
+        
         .catch(function (error) {
           console.log(error);
       });
@@ -184,6 +186,7 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 0 2rem;
+    // background-color: rgb(64, 109, 59);
     .user-details {
       display: flex;
       align-items: center;
@@ -195,7 +198,7 @@ const Container = styled.div`
       }
       .username {
         h3 {
-          color: white;
+          color: black;
         }
       }
     }
@@ -209,7 +212,7 @@ const Container = styled.div`
     &::-webkit-scrollbar {
       width: 0.2rem;
       &-thumb {
-        background-color: #ffffff39;
+        background-color: red;
         width: 0.1rem;
         border-radius: 1rem;
       }
@@ -223,7 +226,7 @@ const Container = styled.div`
         padding: 1rem;
         font-size: 1.1rem;
         border-radius: 1rem;
-        color: #d1d1d1;
+        color: white;
         @media screen and (min-width: 720px) and (max-width: 1080px) {
           max-width: 70%;
         }
@@ -232,13 +235,13 @@ const Container = styled.div`
     .sended {
       justify-content: flex-end;
       .content {
-        background-color: #4f04ff21;
+        background-color: rgb(98, 127, 95);
       }
     }
     .recieved {
       justify-content: flex-start;
       .content {
-        background-color: #9900ff20;
+        background-color: rgb(98, 127, 95);
       }
     }
   }
