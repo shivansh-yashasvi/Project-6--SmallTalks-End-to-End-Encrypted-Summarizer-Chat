@@ -1,8 +1,625 @@
-# Steps to Start the App
+# SMALL CHAT
+This is a chat application that can be used for local usage in a small network. It creates a local server and people connected to the network can do a group or private chat. The chat also has an option to summarize the received text message to save time from reading unnecessary spams.
 
-## Install the FrontEnd Dependencies
-## Install the Backend(Server) Dependencies
-## In the Server Directory there's an extra .env file to be added. The value of mongodb URI is stored inside the file.
-## Now start the server by yarn start
-## Now start the react by yarn start
-## And the chat application would be running successfully by now.
+## Features<a name="features"></a>
++ Uses Express as the application Framework.
++ Manages Sessions using [express-session](https://github.com/expressjs/session) package.
++ Authenticates via username and password using [Passport](https://github.com/jaredhanson/passport).
++ Passwords are hashed using [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs) package.
++ Social Authentication via Facebook and Twitter using [Passport](https://github.com/jaredhanson/passport).
++ Real-time communication between a client and a server using [Socket.io](https://github.com/socketio/socket.io).
++ Uses [MongoDB](https://github.com/mongodb/mongo), [Mongoose](https://github.com/Automattic/mongoose) and [MongoLab(mLab)](https://mlab.com/) for storing and querying data.
++ Stores session in a [MongoDB](https://github.com/mongodb/mongo) using [connect-mongo](https://github.com/kcbanner/connect-mongo); a MongoDB-based session store.
++ Summarizes received text into gist using Text Rank Algorithm which I hosted using fast API.
+
+## How It Works<a name="how-it-works"></a>
+
+
+#### MongoDB & MongoLab
+You need to create a database on MongoLab, then create a database user, get the `MongoDB URI`, and assign it to `dbURI`.
+
+
+#### Session
+The session needs a random string to make sure the session id in the browser is random. That random string is used to encrypt the session id in the browser, _Why?_ To prevent session id guessing.
+
+
+### Database<a name="database"></a>
+Mongoose is used to interact with a MongoDB that's hosted by MongoLab. 
+
+#### Schemas
+There are two schemas; users and rooms. 
+
+Each user has a username, passowrd, social Id, and picture. If the user is logged via username and password, then social Id has to be null, and the if logged in via a social account, then the password will be null.
+
+Each room has a title, and array of connections. Each item in the connections array represents a user connected through a unique socket; object composed of _{userId + socketId}_. Both of them together are unique.
+
+### Models<a name="models"></a>
+Each model wraps Mongoose Model object, overrides and provides some methods. There are two models; User and Room.
+
+### Session<a name="session"></a>
+Session in Express applications are best managed using [express-session](https://github.com/expressjs/session) package. Session data are stored locally on your computer, while it's stored in the database on the production environment. Session data will be deleted upon logging out.
+
+### User Authentication<a name="auth"></a>
+User can login using either a username and password, or login via a social account. User authentication is done using [Passport](https://github.com/jaredhanson/passport). Passport has extensive, and step-by-step [documentation](http://passportjs.org/docs/) on how to implement each way of authentication.
+
+### Sockets<a name="sockets"></a>
+Having an active connection opened between the client and the server so client can send and receive data. This allows real-time communication using TCP sockets. This is made possible by [Socket.io](https://github.com/socketio/socket.io).
+
+The client starts by connecting to the server through a socket(maybe also assigned to a specific namespace). Once connections is successful, client and server can emit and listen to events. 
+
+There are two namespaces used; `/contacts` and `/chatroom`.
+
+
+## Summarizer
+### TextRank
+> Automatic summarization is the process of reducing a text document with a computer program in order to create a summary that retains the most important points of the original document. Technologies that can make a coherent summary take into account variables such as length, writing style and syntax. Automatic data summarization is part of machine learning and data mining. The main idea of summarization is to find a representative subset of the data, which contains the information of the entire set. Summarization technologies are used in a large number of sectors in industry today. - Wikipedia
+
+# Instructions to run
+
+### DataBase - Mongo
+* Used MongoDB for storing user data and message data.
+
+### Server
+* You need to have node and npm installed in your machine.
+* open up your teminal or command prompt go to the directory `chat`
+* Do install all dependencies using  
+   `npm install`  
+   `npm install -g nodemon`  
+   `npm start`  
+Your server will be setup and ready for use.
+
+### UI
+* Go to browser and type `localhost:8080` in place of url.
+* Register user by giving basic details.
+* Login from the same screen.  
+`Note: Handle should be unique for every user.`
+
+<h1>
+TextRank
+</h1>
+
+
+The algorithm of this implementation is:
+* Find sentences,
+* Remove stopwords,
+* Create integer values by find and count the matching words,
+* Change the integer values by the related words' integer values,
+* Normalize values to create scores,
+* Order by scores
+
+## Extractive Summarization based on sentence ranking using TextRank
+
+This is a simple implementation of extractive summarization based on sentence ranking using TextRank.
+
+[TextRank: Bringing Order into Texts - by Rada Mihalcea and Paul Tarau](https://web.eecs.umich.edu/~mihalcea/papers/mihalcea.emnlp04.pdf)
+
+
+
+### Here's the beginning of the code:
+
+
+
+```python
+filename = 'summarytest.txt' #Enter Filename
+```
+
+### Loading the data into Python variable from the file. 
+
+
+```python
+file = open(filename,'r')
+Text = ""
+for line in file.readlines():
+    Text+=str(line)
+    Text+=" "
+file.close()
+```
+
+### Removing non-printable characters from data, and tokenizing the resultant text.
+
+
+```python
+import nltk
+from nltk import word_tokenize
+import string
+
+def clean(text):
+    printable = set(string.printable)
+    text = filter(lambda x: x in printable, text) #filter funny characters, if any.
+    return text
+
+Cleaned_text = clean(Text)
+
+text = word_tokenize(Cleaned_text)
+case_insensitive_text = word_tokenize(Cleaned_text.lower())
+```
+
+### Sentence Segmentation.
+
+Senteces is a list of segmented sentences in the natural form with case sensitivity. This will be
+necessary for displaying the summary later on.
+
+Tokenized_sentences is a list of tokenized segmented sentences without case sensitivity. This will be
+useful for text processing later on. 
+
+
+```python
+# Sentence Segmentation
+
+sentences = []
+tokenized_sentences = []
+sentence = " "
+for word in text:
+    if word != '.':
+        sentence+=str(word)+" "
+    else:
+        sentences.append(sentence.strip())
+        tokenized_sentences.append(word_tokenize(sentence.lower().strip()))
+        sentence = " "
+        
+```
+
+### Lemmatization of tokenized words. 
+
+
+```python
+from nltk.stem import WordNetLemmatizer
+
+def lemmatize(POS_tagged_text):
+    
+    wordnet_lemmatizer = WordNetLemmatizer()
+    adjective_tags = ['JJ','JJR','JJS']
+    lemmatized_text = []
+    
+    for word in POS_tagged_text:
+        if word[1] in adjective_tags:
+            lemmatized_text.append(str(wordnet_lemmatizer.lemmatize(word[0],pos="a")))
+        else:
+            lemmatized_text.append(str(wordnet_lemmatizer.lemmatize(word[0]))) #default POS = noun
+    
+    return lemmatized_text
+
+#Pre_processing:
+
+POS_tagged_text = nltk.pos_tag(case_insensitive_text)
+lemmatized_text = lemmatize(POS_tagged_text)
+```
+
+### POS Tagging lemmatized words.
+
+This will be useful for generating stopwords. 
+
+
+```python
+Processed_text = nltk.pos_tag(lemmatized_text)
+```
+
+### Stopwords Generation.
+
+Based on the assumption that typically only nouns and adjectives are qualified as parts of keyword phrases, I will include any word that aren't tagged as a noun or adjective to the list of stopwords. (Note: Gerunds can often be important keywords or components of it. But including words tagged as 'VBG' (tag for present participles and gerunds) also include verbs of present continiuous forms which should be treated as stopwords. So I am not adding 'VBG' to list of wanted_POS (words having POS tags mentioned in this list, won't be considered as stopwords). Punctuations will be added to the same list (of stopwords). Additionally, the long list of stopwords which from https://www.ranks.nl/stopwords (which is stored in an external file) are also added to the list. 
+
+
+```python
+def generate_stopwords(POS_tagged_text):
+    stopwords = []
+    
+    wanted_POS = ['NN','NNS','NNP','NNPS','JJ','JJR','JJS','FW'] #may be add VBG too
+    
+    for word in POS_tagged_text:
+        if word[1] not in wanted_POS:
+            stopwords.append(word[0])
+            
+    punctuations = list(str(string.punctuation))
+    stopwords = stopwords + punctuations
+    
+    stopword_file = open("long_stopwords.txt", "r")
+    #Source = https://www.ranks.nl/stopwords
+
+    for line in stopword_file.readlines():
+        stopwords.append(str(line.strip()))
+
+    return set(stopwords)
+
+stopwords = generate_stopwords(Processed_text)
+```
+
+### Processing tokenized sentences.
+
+Lemmatizing words in the sentences, and removing stopwords.
+
+
+
+```python
+processed_sentences = []
+
+for sentence in tokenized_sentences:
+    processed_sentence = []
+    
+    POS_tagged_sentence = nltk.pos_tag(sentence)
+    lemmatized_sentence = lemmatize(POS_tagged_sentence)
+
+    for word in lemmatized_sentence:
+        if word not in stopwords:
+            processed_sentence.append(word)
+    processed_sentences.append(processed_sentence)
+
+```
+
+### Building Graph
+
+TextRank is a graph based model, and thus it requires us to build a graph. Each sentence in the text will serve as a vertex for the graph. The sentences will be represented in the vertices by their index in the list of sentences\processed_sentences. 
+
+The weighted_edge matrix contains the information of edge connections among all the vertices. I am building a graph with wieghted undirected edges.
+
+weighted_edge[i][j] contains the weight of the connecting edge between the sentence vertex represented by sentence of index i and the sentence vertex represented by sentence of index j.
+
+If weighted_edge[i][j] is zero, it means no edge or connection is present between the sentences represented by index i and j.
+
+There is a connection or edge between the sentences (and thus between i and j which represents them) if the the value of the similarity between the two sentences is non-zero. The weight of the connection is the value of the similarity between the connected vertices.
+
+The value of the weighted_edge[i][j] is determined by the similarity function. 
+
+The similarity function is: 
+(No. of overlapping words in sentence i and j)/(log(len(sentence_i)) + log(len(sentence_j))
+
+The score of all vertices are intialized to be one.
+Self-connections are not considered, so weighted_edge[i][i] will be zero.
+
+
+```python
+import numpy as np
+import math
+from __future__ import division
+
+sentence_len = len(processed_sentences)
+weighted_edge = np.zeros((sentence_len,sentence_len),dtype=np.float32)
+
+score = np.zeros((sentence_len),dtype=np.float32)
+
+for i in xrange(0,sentence_len):
+    score[i]=1
+    for j in xrange(0,sentence_len):
+        if j==i:
+            weighted_edge[i][j]=0
+        else:
+            for word in processed_sentences[i]:
+                if word in processed_sentences[j]:
+                    weighted_edge[i][j] += processed_sentences[j].count(word)
+            if weighted_edge[i][j]!=0:
+                len_i = len(processed_sentences[i])
+                len_j = len(processed_sentences[j])
+                weighted_edge[i][j] = weighted_edge[i][j]/(math.log(len_i)+math.log(len_j))
+
+```
+
+### Calculating weighted summation of connections of a vertex
+
+inout[i] will contain the total no. of undirected connections\edges associated with the vertex represented by i.
+
+
+```python
+inout = np.zeros((sentence_len),dtype=np.float32)
+
+for i in xrange(0,sentence_len):
+    for j in xrange(0,sentence_len):
+        inout[i]+=weighted_edge[i][j]
+```
+
+### Scoring Vertices
+
+The formula used for scoring a vertex represented by i is:
+
+score[i] = (1-d) + d x [ Summation(j) ( (weighted_edge[i][j]/inout[j]) x score[j] ) ] where j belongs to the list of vertices that has a connection with i. 
+
+d is the damping factor.
+
+The score is iteratively updated until convergence. 
+
+
+```python
+MAX_ITERATIONS = 50
+d=0.85
+threshold = 0.0001 #convergence threshold
+
+for iter in xrange(0,MAX_ITERATIONS):
+    prev_score = np.copy(score)
+    
+    for i in xrange(0,sentence_len):
+        
+        summation = 0
+        for j in xrange(0,sentence_len):
+            if weighted_edge[i][j] != 0:
+                summation += (weighted_edge[i][j]/inout[j])*score[j]
+                
+        score[i] = (1-d) + d*(summation)
+    
+    if np.sum(np.fabs(prev_score-score)) <= threshold: #convergence condition
+        print "Converging at iteration "+str(iter)+"...."
+        break
+
+```
+
+    Converging at iteration 25....
+
+
+### Displaying each sentence and its corresponding score:
+
+
+```python
+i=0
+for sentence in sentences:
+    print "Sentence:\n\n"+str(sentence)+"\nScore: "+str(score[i])+"\n\n"
+    i+=1
+```
+
+    Sentence:
+    
+    Autotldr is a bot that uses SMMRY to create a TL ; DR/summary
+    Score: 1.18796
+    
+    
+    Sentence:
+    
+    I will put forth points that address the effects this bot has on the reddit community
+    Score: 0.940897
+    
+    
+    Sentence:
+    
+    It does n't create laziness , it only responds to it For the users who click the article link first and then return back to the comments , they will have already given their best attempt of fully reading the article
+    Score: 1.05546
+    
+    
+    Sentence:
+    
+    If they read it fully , the tl ; dr is unneeded and ignored
+    Score: 0.828447
+    
+    
+    Sentence:
+    
+    If they skimmed or skipped it , the bot will be useful to at least provide more context to the discussion , like an extension of the title
+    Score: 0.834126
+    
+    
+    Sentence:
+    
+    A large portion of users , especially in the defaulted mainstream subreddits like /r/politics , do n't even go to the article and go straight to the comments section
+    Score: 0.990735
+    
+    
+    Sentence:
+    
+    Most of the time , if I skip to the comments , I 'm able to illicit some sort of understanding of what the article was about from the title and discussion
+    Score: 0.919072
+    
+    
+    Sentence:
+    
+    However this bot is able to further improve my conjectured understanding
+    Score: 0.727377
+    
+    
+    Sentence:
+    
+    It did not make me skip it , it only helped me when I already decided to skip it
+    Score: 0.15
+    
+    
+    Sentence:
+    
+    The scenario in which this bot would create a significantly lazy atmosphere is if the tl ; dr were to be presented parallel to the main submission , in the same way the OP 's tl ; dr is presented right next to the long body of self post
+    Score: 1.34784
+    
+    
+    Sentence:
+    
+    Also , the tl ; dr becomes more prevalent/hidden as it will get upvoted/downvoted depending on how much of a demand there was for a tl ; dr in the first place
+    Score: 1.13423
+    
+    
+    Sentence:
+    
+    If it becomes the top voted comment than it has become more of a competitor to the original text for those who go to the comments first , but by then the thread has decided that a tl ; dr was useful and the bot delivered
+    Score: 1.44883
+    
+    
+    Sentence:
+    
+    It can make sophisticated topics more relevant to mainstream Reddit Sophisticated and important topics are usually accompanied or presented by long detailed articles
+    Score: 1.19482
+    
+    
+    Sentence:
+    
+    By making these articles and topics relevant to a larger portion of the Reddit userbase ( those who were n't willing to read the full article ) , it popularizes the topic and increases user participation
+    Score: 1.43953
+    
+    
+    Sentence:
+    
+    These posts will get more attention in the form of upvotes/downvotes , comments , and reposts
+    Score: 0.367749
+    
+    
+    Sentence:
+    
+    This will increase the prevalence of sophisticated topics in the mainstream subreddits and compete against cliched memes
+    Score: 0.588198
+    
+    
+    Sentence:
+    
+    This has the potential of re-sophisticating the topic discussion in the mainstream subreddits , as more hardcore redditors do n't have to retreat to a safe haven like /r/TrueReddit
+    Score: 0.595447
+    
+    
+    Sentence:
+    
+    This is a loose approximation and the magnitude of this effect is questionable , but I 'm not surprised if the general direction of the theory is correct
+    Score: 0.15
+    
+    
+    Sentence:
+    
+    I 'm not claiming this would improve reddit overnight , but instead very very gradually
+    Score: 0.484023
+    
+    
+    Sentence:
+    
+    It decreases Reddit 's dependency on external sites The bot doubles as a context provider for when a submission link goes down , is removed , or inaccessible at work/school
+    Score: 1.00579
+    
+    
+    Sentence:
+    
+    The next time the article you clicked gives you a 404 error , you wo n't have to depend on the users to provide context as the bot will have been able to provide that service at a much faster and consistent rate than a person
+    Score: 1.0597
+    
+    
+    Sentence:
+    
+    Additionally , an extended summary is posted in /r/autotldr , which acts as a perpetual archive and decreases how much reddit gets broken by external sites
+    Score: 0.472735
+    
+    
+    Sentence:
+    
+    Only useful tl ; dr 's are posted There are several criteria for a bot to post a tl ; dr
+    Score: 1.64419
+    
+    
+    Sentence:
+    
+    It posts the three most important sentences as decided by the core algorithm , and they must be within 450-700 characters total
+    Score: 0.15
+    
+    
+    Sentence:
+    
+    The final tl ; dr must also be 70 % smaller than the original , that way there is a big gap between the original and the tl ; dr , hence only very long articles get posted on
+    Score: 1.34355
+    
+    
+    Sentence:
+    
+    This way the likelihood of someone nonchalantly declaring `` TL ; DR '' in a thread and the bot posting in the same one is high
+    Score: 1.15188
+    
+    
+    Sentence:
+    
+    Also my strategy is to tell the bot to post in default , mainstream subreddits were the demand for a TL ; DR is much higher than /r/TrueReddit and /r/worldevents
+    Score: 1.23764
+    
+    
+    Sentence:
+    
+    Feel free to respond to these concepts and to raise your own
+    Score: 0.15
+    
+    
+    Sentence:
+    
+    Be polite , respectful , and clarify what you say
+    Score: 0.15
+    
+    
+    Sentence:
+    
+    Any offending posts to this rule will be removed
+    Score: 0.15
+    
+    
+
+
+### Summary Generation
+
+Given the percentage of original text that will be near about the size of the summary, the program computes the extact summary_size. Sentences are then ranked in accordance to their corresponding scores. 
+
+More precisely, the indices of the sentences are sorted based on the scores of their corresponding sentences. Based on size of the summary, indices of top 'summary_size' no. of highest scoring input sentences are chosen for generating the summary. 
+
+The summary is then generated by presenting the sentences (whose indices were chosen) in a chronological order.
+
+Note: I hardcoded the selection of the first statement (if the summary_size is computed to be more than 1) because the first sentence can usually serve as an introduction, and provide some context to the topic.
+
+
+```python
+Reduce_to_percent = 20
+summary_size = int(((Reduce_to_percent)/100)*len(sentences))
+
+if summary_size == 0:
+    summary_size = 1
+
+sorted_sentence_score_indices = np.flip(np.argsort(score),0)
+
+indices_for_summary_results = sorted_sentence_score_indices[0:summary_size]
+
+summary = "\n"
+
+current_size = 0
+
+if 0 not in indices_for_summary_results and summary_size!=1:
+    summary+=sentences[0]
+    summary+=".\n\n"
+    current_size+=1
+
+
+for i in xrange(0,len(sentences)):
+    if i in indices_for_summary_results:
+        summary+=sentences[i]
+        summary+=".\n\n"
+        current_size += 1
+    if current_size == summary_size:
+        break
+
+print "\nSUMMARY: "
+print summary
+
+```
+
+### ORIGINAL TEXT: 
+[(Source)](https://www.reddit.com/r/autotldr/comments/31b9fm/faq_autotldr_bot/)
+
+Autotldr is a bot that uses SMMRY to create a TL;DR/summary. I will put forth points that address the effects this bot has on the reddit community.
+
+It doesn't create laziness, it only responds to it
+
+For the users who click the article link first and then return back to the comments, they will have already given their best attempt of fully reading the article. If they read it fully, the tl;dr is unneeded and ignored. If they skimmed or skipped it, the bot will be useful to at least provide more context to the discussion, like an extension of the title. A large portion of users, especially in the defaulted mainstream subreddits like /r/politics, don't even go to the article and go straight to the comments section. Most of the time, if I skip to the comments, I'm able to illicit some sort of understanding of what the article was about from the title and discussion. However this bot is able to further improve my conjectured understanding. It did not make me skip it, it only helped me when I already decided to skip it. The scenario in which this bot would create a significantly lazy atmosphere is if the tl;dr were to be presented parallel to the main submission, in the same way the OP's tl;dr is presented right next to the long body of self post. Also, the tl;dr becomes more prevalent/hidden as it will get upvoted/downvoted depending on how much of a demand there was for a tl;dr in the first place. If it becomes the top voted comment than it has become more of a competitor to the original text for those who go to the comments first, but by then the thread has decided that a tl;dr was useful and the bot delivered.
+
+It can make sophisticated topics more relevant to mainstream Reddit
+
+Sophisticated and important topics are usually accompanied or presented by long detailed articles. By making these articles and topics relevant to a larger portion of the Reddit userbase (those who weren't willing to read the full article), it popularizes the topic and increases user participation. These posts will get more attention in the form of upvotes/downvotes, comments, and reposts. This will increase the prevalence of sophisticated topics in the mainstream subreddits and compete against cliched memes. This has the potential of re-sophisticating the topic discussion in the mainstream subreddits, as more hardcore redditors don't have to retreat to a safe haven like /r/TrueReddit. This is a loose approximation and the magnitude of this effect is questionable, but I'm not surprised if the general direction of the theory is correct. I'm not claiming this would improve reddit overnight, but instead very very gradually.
+
+It decreases Reddit's dependency on external sites
+
+The bot doubles as a context provider for when a submission link goes down, is removed, or inaccessible at work/school. The next time the article you clicked gives you a 404 error, you won't have to depend on the users to provide context as the bot will have been able to provide that service at a much faster and consistent rate than a person. Additionally, an extended summary is posted in /r/autotldr, which acts as a perpetual archive and decreases how much reddit gets broken by external sites.
+
+Only useful tl;dr's are posted
+
+There are several criteria for a bot to post a tl;dr. It posts the three most important sentences as decided by the core algorithm, and they must be within 450-700 characters total. The final tl;dr must also be 70% smaller than the original, that way there is a big gap between the original and the tl;dr, hence only very long articles get posted on. This way the likelihood of someone nonchalantly declaring "TL;DR" in a thread and the bot posting in the same one is high. Also my strategy is to tell the bot to post in default, mainstream subreddits were the demand for a TL;DR is much higher than /r/TrueReddit and /r/worldevents.
+
+Feel free to respond to these concepts and to raise your own. Be polite, respectful, and clarify what you say. Any offending posts to this rule will be removed.
+
+
+### GENERATED SUMMARY:
+
+Autotldr is a bot that uses SMMRY to create a TL ; DR/summary.
+
+The scenario in which this bot would create a significantly lazy atmosphere is if the tl ; dr were to be presented parallel to the main submission , in the same way the OP 's tl ; dr is presented right next to the long body of self post.
+
+If it becomes the top voted comment than it has become more of a competitor to the original text for those who go to the comments first , but by then the thread has decided that a tl ; dr was useful and the bot delivered.
+
+By making these articles and topics relevant to a larger portion of the Reddit userbase ( those who were n't willing to read the full article ) , it popularizes the topic and increases user participation.
+
+Only useful tl ; dr 's are posted There are several criteria for a bot to post a tl ; dr.
+
+The final tl ; dr must also be 70 % smaller than the original , that way there is a big gap between the original and the tl ; dr , hence only very long articles get posted on.
+
+
+    
+
+
+
+
