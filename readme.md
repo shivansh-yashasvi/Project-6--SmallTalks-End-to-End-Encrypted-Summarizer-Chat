@@ -6,10 +6,8 @@ This is a chat application that can be used for local usage in a small network. 
 + Manages Sessions using [express-session](https://github.com/expressjs/session) package.
 + Authenticates via username and password using [Passport](https://github.com/jaredhanson/passport).
 + Passwords are hashed using [bcrypt-nodejs](https://github.com/shaneGirish/bcrypt-nodejs) package.
-+ Social Authentication via Facebook and Twitter using [Passport](https://github.com/jaredhanson/passport).
 + Real-time communication between a client and a server using [Socket.io](https://github.com/socketio/socket.io).
 + Uses [MongoDB](https://github.com/mongodb/mongo), [Mongoose](https://github.com/Automattic/mongoose) and [MongoLab(mLab)](https://mlab.com/) for storing and querying data.
-+ Stores session in a [MongoDB](https://github.com/mongodb/mongo) using [connect-mongo](https://github.com/kcbanner/connect-mongo); a MongoDB-based session store.
 + Summarizes received text into gist using Text Rank Algorithm which I hosted using fast API.
 
 ## How It Works<a name="how-it-works"></a>
