@@ -4,7 +4,7 @@ This is a chat application that can be used for local usage in a small network. 
 ## Features<a name="features"></a>
 + Uses Express as the application Framework.
 + Manages Sessions using [express-session](https://github.com/expressjs/session) package.
-+ Authenticates via username and password using [Passport](https://github.com/jaredhanson/passport).
++ Authenticates via username and password
 + Passwords are hashed using [crypto-js](https://www.npmjs.com/package/crypto-js) package.
 + Real-time communication between a client and a server using [Socket.io](https://github.com/socketio/socket.io).
 + Uses [MongoDB](https://github.com/mongodb/mongo), [Mongoose](https://github.com/Automattic/mongoose) and [MongoLab(mLab)](https://mlab.com/) for storing and querying data.
@@ -38,7 +38,7 @@ Each model wraps Mongoose Model object, overrides and provides some methods. The
 Session in Express applications are best managed using [express-session](https://github.com/expressjs/session) package. Session data are stored locally on your computer, while it's stored in the database on the production environment. Session data will be deleted upon logging out.
 
 ### User Authentication<a name="auth"></a>
-User can login using either a username and password, or login via a social account. User authentication is done using [Passport](https://github.com/jaredhanson/passport). Passport has extensive, and step-by-step [documentation](http://passportjs.org/docs/) on how to implement each way of authentication.
+User can login using either a username and password.
 
 ### Sockets<a name="sockets"></a>
 Having an active connection opened between the client and the server so client can send and receive data. This allows real-time communication using TCP sockets. This is made possible by [Socket.io](https://github.com/socketio/socket.io).
