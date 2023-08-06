@@ -5,7 +5,8 @@ This is a chat application that can be used for local usage in a small network. 
 + Uses Express as the application Framework.
 + Manages Sessions using [express-session](https://github.com/expressjs/session) package.
 + Authenticates via username and password
-+ Passwords are hashed using [crypto-js](https://www.npmjs.com/package/crypto-js) package.
++ Messages are doubly encryptyed using [crypto-js](https://www.npmjs.com/package/crypto-js).
++ Passwords are hashed using [bcrypt](https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/crypto/bcrypt/BCryptPasswordEncoder.html).
 + Real-time communication between a client and a server using [Socket.io](https://github.com/socketio/socket.io).
 + Uses [MongoDB](https://github.com/mongodb/mongo), [Mongoose](https://github.com/Automattic/mongoose) and [MongoLab(mLab)](https://mlab.com/) for storing and querying data.
 + Summarizes received text into gist using Text Rank Algorithm which I hosted using fast API.
